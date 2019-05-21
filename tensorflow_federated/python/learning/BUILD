@@ -1,4 +1,9 @@
-package(default_visibility = ["//tensorflow_federated/python/learning:__subpackages__"])
+package_group(
+    name = "internal",
+    packages = ["//tensorflow_federated/python/learning/..."],
+)
+
+package(default_visibility = [":internal"])
 
 licenses(["notice"])  # Apache 2.0
 
@@ -113,6 +118,7 @@ py_library(
 py_library(
     name = "model_examples",
     srcs = ["model_examples.py"],
+    visibility = [":internal"],
     deps = [
         ":model",
         "//tensorflow_federated/python/core",
@@ -133,6 +139,7 @@ py_test(
 py_library(
     name = "model_utils",
     srcs = ["model_utils.py"],
+    visibility = [":internal"],
     deps = [
         ":model",
         "//tensorflow_federated/python/common_libs:anonymous_tuple",
