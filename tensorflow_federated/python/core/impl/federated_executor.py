@@ -84,15 +84,23 @@ class FederatedExecutorValue(executor_value_base.ExecutorValue):
     return self._type_signature
 
   async def compute(self):
-    if isinstance(self._value, executor_value_base.Value):
+    if isinstance(self._value, executor_value_base.ExecutorValue):
       return await self._value.compute()
     elif isinstance(self._type_signature, computation_types.FederatedType):
       py_typecheck.check_type(self._value, list)
+      if self._type_signature.all_equal:
+        vals = [self._value[0]]
+      else:
+        vals = self._value
       results = []
-      for v in self._value:
-        py_typecheck.check_type(v, executor_value_base.Value)
+      for v in vals:
+        py_typecheck.check_type(v, executor_value_base.ExecutorValue)
         results.append(v.compute())
-      return await asyncio.gather(*results)
+      results = await asyncio.gather(*results)
+      if self._type_signature.all_equal:
+        return results[0]
+      else:
+        return results
     else:
       raise RuntimeError('Computing values of type {} represented as {} is not '
                          'supported in this executor.'.format(
@@ -386,6 +394,9 @@ class FederatedExecutor(executor_base.Executor):
     for idx in range(cardinality):
       new_vals.append(
           anonymous_tuple.AnonymousTuple([(k, v[idx]) for k, v in elements]))
+    children = self._target_executors[placement]
+    new_vals = await asyncio.gather(
+        *[c.create_tuple(x) for c, x in zip(children, new_vals)])
     return FederatedExecutorValue(
         new_vals,
         computation_types.FederatedType(

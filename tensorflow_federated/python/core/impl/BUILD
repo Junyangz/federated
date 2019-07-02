@@ -434,6 +434,35 @@ py_test(
 )
 
 py_library(
+    name = "executor_stacks",
+    srcs = ["executor_stacks.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":concurrent_executor",
+        ":eager_executor",
+        ":federated_executor",
+        ":lambda_executor",
+        ":placement_literals",
+        "//tensorflow_federated/python/common_libs:py_typecheck",
+    ],
+)
+
+py_test(
+    name = "executor_stacks_test",
+    size = "small",
+    srcs = ["executor_stacks_test.py"],
+    python_version = "PY3",
+    deps = [
+        ":executor_stacks",
+        ":set_default_executor",
+        ":type_constructors",
+        "//tensorflow_federated/python/core/api:computation_types",
+        "//tensorflow_federated/python/core/api:computations",
+        "//tensorflow_federated/python/core/api:intrinsics",
+    ],
+)
+
+py_library(
     name = "executor_value_base",
     srcs = ["executor_value_base.py"],
     srcs_version = "PY3",
@@ -708,9 +737,11 @@ py_library(
     srcs = ["lambda_executor.py"],
     srcs_version = "PY3",
     deps = [
+        ":computation_building_blocks",
         ":computation_impl",
         ":executor_base",
         ":executor_value_base",
+        ":transformations",
         ":type_serialization",
         ":type_utils",
         "//tensorflow_federated/proto/v0:tensorflow_federated_v0_py_pb2",
@@ -728,10 +759,14 @@ py_test(
     deps = [
         ":computation_building_blocks",
         ":eager_executor",
+        ":federated_executor",
         ":lambda_executor",
+        ":placement_literals",
+        ":type_constructors",
         "//tensorflow_federated/python/common_libs:anonymous_tuple",
         "//tensorflow_federated/python/core/api:computation_types",
         "//tensorflow_federated/python/core/api:computations",
+        "//tensorflow_federated/python/core/api:intrinsics",
     ],
 )
 
